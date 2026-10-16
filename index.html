@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Combustible y Conversores</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans p-4 sm:p-6">
+
+    <div class="max-w-4xl mx-auto space-y-6">
+        
+        <!-- Encabezado -->
+        <header class="text-center bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700">
+            <h1 class="text-2xl sm:text-3xl font-bold text-cyan-400">Calculadora de Combustible</h1>
+            <p class="text-slate-400 text-sm mt-1">Control de boleta, volúmenes, conversiones y conversores rápidos</p>
+        </header>
+
+        <!-- Resultados en Tiempo Real (Orden: Remanente, Agregado, Fuel final) -->
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Remanente -->
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md text-center">
+                <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Remanente</span>
+                <div id="resRemanente" class="text-2xl font-black text-cyan-400 mt-1">0.00</div>
+            </div>
+            <!-- Agregado -->
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md text-center">
+                <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Agregado</span>
+                <div id="resAgregado" class="text-2xl font-black text-emerald-400 mt-1">0.00</div>
+            </div>
+            <!-- Fuel Final -->
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-md text-center">
+                <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Fuel Final</span>
+                <div id="resFuelFinal" class="text-2xl font-black text-amber-400 mt-1">0.00</div>
+            </div>
+        </section>
+
+        <!-- Formulario Principal -->
+        <main class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div class="space-y-4">
+                <h2 class="text-lg font-semibold text-slate-200 border-b border-slate-700 pb-2">Datos de Entrada</h2>
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Número de Boleta</label>
+                    <input type="text" id="boleta" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500" placeholder="Ej. B-10492">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Hora</label>
+                    <input type="text" id="hora" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500" placeholder="Ej. 14:30">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Galones</label>
+                    <input type="number" step="any" id="galones" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500" placeholder="0.00" oninput="calcular()">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Final</label>
+                    <input type="number" step="any" id="finalVal" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500" placeholder="0.00" oninput="calcular()">
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <h2 class="text-lg font-semibold text-slate-200 border-b border-slate-700 pb-2">Parámetros</h2>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Temperatura</label>
+                    <input type="number" step="any" id="temperatura" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500" placeholder="0.00">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Densidad</label>
+                    <input type="number" step="any" id="densidad" value="0.8" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-cyan-500" placeholder="0.8" oninput="calcular()">
+                </div>
+
+                <div class="pt-6 flex gap-3">
+                    <button onclick="guardarRegistro()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition duration-200">
+                        Guardar en Historial
+                    </button>
+                    <button onclick="limpiarFormulario()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold py-3 px-4 rounded-xl transition duration-200">
+                        Limpiar
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Conversores Rápidos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Conversor Kilos a Libras -->
+            <div class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700 space-y-3">
+                <h3 class="text-md font-semibold text-cyan-400">Conversor: Kilos a Libras</h3>
+                <div class="flex gap-2">
+                    <input type="number" step="any" id="inputKilos" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500" placeholder="Ingrese Kilos">
+                    <button onclick="convertirKgLbs()" class="bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded-lg font-medium text-sm transition">Convertir</button>
+                </div>
+                <div class="text-sm text-slate-300 flex justify-between items-center">
+                    <span>Resultado (Libras): <strong id="resLibras" class="text-cyan-400">0.00</strong></span>
+                    <button onclick="enviarAFinal()" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-3 py-1.5 rounded font-medium transition text-white">Enviar a Final</button>
+                </div>
+            </div>
+
+            <!-- Conversor Fahrenheit a Celsius -->
+            <div class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700 space-y-3">
+                <h3 class="text-md font-semibold text-cyan-400">Conversor: Fahrenheit a Celsius</h3>
+                <div class="flex gap-2">
+                    <input type="number" step="any" id="inputFahrenheit" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500" placeholder="Ingrese °F">
+                    <button onclick="convertirFC()" class="bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded-lg font-medium text-sm transition">Convertir</button>
+                </div>
+                <div class="text-sm text-slate-300 flex justify-between items-center">
+                    <span>Resultado (°C): <strong id="resCelsius" class="text-cyan-400">0.00</strong></span>
+                    <button onclick="enviarATemperatura()" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-3 py-1.5 rounded font-medium transition text-white">Enviar a Temperatura</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial -->
+        <section class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 space-y-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-slate-200">Historial de Registros</h2>
+                <button onclick="limpiarHistorial()" class="text-xs bg-red-900/40 hover:bg-red-900/70 text-red-300 border border-red-700 px-3 py-1.5 rounded-lg transition">Borrar Historial</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-700 text-slate-400">
+                            <th class="py-2 px-3">Boleta</th>
+                            <th class="py-2 px-3">Hora</th>
+                            <th class="py-2 px-3">Galones</th>
+                            <th class="py-2 px-3">Final</th>
+                            <th class="py-2 px-3">Temp</th>
+                            <th class="py-2 px-3">Dens</th>
+                            <th class="py-2 px-3 text-cyan-400">Remanente</th>
+                            <th class="py-2 px-3 text-emerald-400">Agregado</th>
+                            <th class="py-2 px-3 text-amber-400">Fuel Final</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaHistorial" class="divide-y divide-slate-700/50 text-slate-300">
+                        <!-- Registros dinámicos -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        function calcular() {
+            const galones = parseFloat(document.getElementById('galones').value) || 0;
+            const finalVal = parseFloat(document.getElementById('finalVal').value) || 0;
+            const densidad = parseFloat(document.getElementById('densidad').value) || 0.8;
+
+            // Agregado = Galones * Densidad
+            const agregado = galones * densidad;
+
+            // Fuel final = Final / 2.2046
+            const fuelFinal = finalVal > 0 ? finalVal / 2.2046 : 0;
+
+            // Remanente = Fuel final - Agregado
+            const remanente = fuelFinal - agregado;
+
+            // Mostrar en pantalla
+            document.getElementById('resRemanente').innerText = remanente.toFixed(2);
+            document.getElementById('resAgregado').innerText = agregado.toFixed(2);
+            document.getElementById('resFuelFinal').innerText = fuelFinal.toFixed(2);
+        }
+
+        function convertirKgLbs() {
+            const kilos = parseFloat(document.getElementById('inputKilos').value) || 0;
+            // 1 Kilo = 2.20462 Libras (o usando 2.2046 si se prefiere uniformidad)
+            const libras = kilos * 2.2046;
+            document.getElementById('resLibras').innerText = libras.toFixed(2);
+        }
+
+        function enviarAFinal() {
+            const libras = document.getElementById('resLibras').innerText;
+            document.getElementById('finalVal').value = libras;
+            calcular();
+        }
+
+        function convertirFC() {
+            const f = parseFloat(document.getElementById('inputFahrenheit').value) || 0;
+            const c = (f - 32) * 5 / 9;
+            document.getElementById('resCelsius').innerText = c.toFixed(2);
+        }
+
+        function enviarATemperatura() {
+            const celsius = document.getElementById('resCelsius').innerText;
+            document.getElementById('temperatura').value = celsius;
+        }
+
+        function guardarRegistro() {
+            const boleta = document.getElementById('boleta').value || '-';
+            const hora = document.getElementById('hora').value || '-';
+            const galones = document.getElementById('galones').value || '0';
+            const finalVal = document.getElementById('finalVal').value || '0';
+            const temperatura = document.getElementById('temperatura').value || '0';
+            const densidad = document.getElementById('densidad').value || '0';
+            
+            const remanente = document.getElementById('resRemanente').innerText;
+            const agregado = document.getElementById('resAgregado').innerText;
+            const fuelFinal = document.getElementById('resFuelFinal').innerText;
+
+            const tbody = document.getElementById('tablaHistorial');
+            const fila = document.createElement('tr');
+            fila.className = 'hover:bg-slate-700/30 transition';
+            fila.innerHTML = `
+                <td class="py-2 px-3 font-medium text-white">${boleta}</td>
+                <td class="py-2 px-3">${hora}</td>
+                <td class="py-2 px-3">${galones}</td>
+                <td class="py-2 px-3">${finalVal}</td>
+                <td class="py-2 px-3">${temperatura}</td>
+                <td class="py-2 px-3">${densidad}</td>
+                <td class="py-2 px-3 font-bold text-cyan-400">${remanente}</td>
+                <td class="py-2 px-3 font-bold text-emerald-400">${agregado}</td>
+                <td class="py-2 px-3 font-bold text-amber-400">${fuelFinal}</td>
+            `;
+            tbody.prepend(fila);
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('boleta').value = '';
+            document.getElementById('hora').value = '';
+            document.getElementById('galones').value = '';
+            document.getElementById('finalVal').value = '';
+            document.getElementById('temperatura').value = '';
+            document.getElementById('densidad').value = '0.8';
+            calcular();
+        }
+
+        function limpiarHistorial() {
+            document.getElementById('tablaHistorial').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
